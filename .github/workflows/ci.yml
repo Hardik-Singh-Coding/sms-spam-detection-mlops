@@ -1,16 +1,16 @@
 name: CI
 
-on: 
+on:
   push:
     branches: [ "main" ]
-  pull_requests:
+  pull_request:
     branches: [ "main" ]
 
 jobs:
   ci:
     runs-on: ubuntu-latest
 
-    stepss:
+    steps:
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -30,7 +30,7 @@ jobs:
         run: ruff check .
 
       - name: Black (check)
-        run:  black --check .
+        run: black --check .
 
       - name: Tests
         run: pytest
