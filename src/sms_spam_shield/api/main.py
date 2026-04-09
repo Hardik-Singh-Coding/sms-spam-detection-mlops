@@ -1,7 +1,19 @@
 from __future__ import annotations
-
-from fastapi import FastAPI
+import joblib
+from pathlib import Path
+from fastapi import HTTPException, FastAPI
 from pydantic import BaseModel, Field
+
+# Specifying the path
+BASE_DIR = Path(__file__).resolve().parents[3]
+MODEL_PATH = BASE_DIR / "artifacts" / "model.joblib"
+
+# Loading the model
+if MODEL_PATH.exists():
+    model = joblib.load(MODEL_PATH)
+else:
+    model = None
+    print(f"Warning: Model not found at {MODEL_PATH}")
 
 
 class PredictRequest(BaseModel):
@@ -16,6 +28,7 @@ class PredictResponse(BaseModel):
 app = FastAPI(title="SMS Spam Shield", version="0.1.0")
 
 
+# ENDPOINTS
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
@@ -23,12 +36,15 @@ def health() -> dict[str, str]:
 
 @app.post("/predict")
 def predict(payload: PredictRequest) -> PredictResponse:
-    # Stubbed response for now
-    text_lower = payload.text.lower()
-    is_spammy = any(
-        w in text_lower for w in ("win", "prize", "free", "call now", "urgent")
-    )
+    if model is None:
+        raise HTTPException(status_code=503, detail="Model artifact missing")
 
-    if is_spammy:
-        return PredictResponse(label="spam", probability=0.9)
-    return PredictResponse(label="ham", probability=0.9)
+    prediction = model.predict([payload.text])[0]
+
+    probabilities = model.predict_proba([payload.text])[0]
+
+    label_map = {"ham": "ham", "spam": "spam"}
+
+    return PredictResponse(
+        label=label_map[prediction], probability=float(max(probabilities))
+    )
