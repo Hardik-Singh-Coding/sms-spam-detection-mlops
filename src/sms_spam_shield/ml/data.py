@@ -16,7 +16,7 @@ def load_sms_spam_collection(path: Path) -> tuple[list[str], list[str]]:
         parts = line.split("\t", maxsplit=1)
         if len(parts) != 2:
             raise ValueError(f"Bad line (expected label<TAB>text): {line!r}")
-        
+
         label, text = parts[0].strip().lower(), parts[1].strip()
         if label not in {"ham", "spam"}:
             raise ValueError(f"Unexpected Label {label!r} in line: {line!r}")

@@ -13,9 +13,9 @@ def build_pipeline() -> Pipeline:
                 TfidfVectorizer(
                     lowercase=True,
                     strip_accents="unicode",
-                    ngram_range = (1, 2),
-                    min_df = 2,
-                    max_df = 0.95,
+                    ngram_range=(1, 2),
+                    min_df=2,
+                    max_df=0.95,
                 ),
             ),
             ("clf", MultinomialNB()),
